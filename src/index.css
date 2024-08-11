@@ -1,15 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --main: rgb(2, 24, 27);
-  --second: #03346e;
-  --third: #6eacda;
-  --fourth: #e2e2b6;
+  --main: rgb(2, 16, 27);
+  --second: rgb(12, 75, 102);
+  --third: rgb(24, 160, 218);
+  --fourth: rgb(19, 186, 246);
+  --myGray: rgb(73, 83, 94);
   --textColor: #fff;
+}
+
+button,
+input,
+textarea {
+  outline: none;
 }
 
 body {
   background-color: var(--main);
+  color: var(--textColor);
+  font-family: "Poppins", sans-serif;
+}
+
+.navbarGrid {
+  display: grid;
+  grid-template-columns: 200px auto 400px;
+}
+
+.navSearchInput:focus + div {
+  background-color: var(--third);
 }

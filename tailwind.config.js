@@ -8,6 +8,7 @@ export default {
         second: "var(--second)",
         third: "var(--third)",
         fourth: "var(--fourth)",
+        myGray: "var(--myGray)",
         textColor: "var(--textColor)",
       },
     },

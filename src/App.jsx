@@ -1,7 +1,10 @@
 import { useState } from "react";
+import DynamicRoutes from "./routes";
+import { useRoutes } from "react-router-dom";
 
 function App() {
-  return <div className="">bahadır</div>;
+  const routes = DynamicRoutes();
+  return useRoutes(routes);
 }
 
 export default App;
