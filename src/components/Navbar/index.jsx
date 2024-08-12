@@ -2,11 +2,13 @@ import classNames from "classnames";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { openModalHandle } from "../../utils";
+import { logoutHandle, openModalHandle } from "../../utils";
+import { useSelector } from "react-redux";
 
 export default function Navbar() {
   const [searchInput, setSearchInput] = useState("");
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.register);
 
   const noSignUpData = [
     {
@@ -70,28 +72,46 @@ export default function Navbar() {
           </AnimatePresence>
         </div>
       </div>
-      <div className="flex items-center justify-end h-full">
-        <div className="mr-5 relative h-full flex items-center justify-center">
-          Join with us
-          <span className="absolute -right-2.5 w-0.5 h-5 top-1/2 -translate-y-1/2 bg-gray-600 rounded-full"></span>
-        </div>
-        {noSignUpData.map((btn, i) => (
-          <button
-            onClick={() => goModal(btn.modalAction)}
-            className={classNames(
-              "text-base h-9 bg-myGray px-2.5 duration-150  w-24",
-              {
-                "bg-sky-600 hover:bg-sky-500 rounded-l-lg": i === 0,
-              },
-              {
-                "bg-cyan-700 hover:bg-cyan-800 rounded-r-lg": i === 1,
-              }
-            )}
-            key={i}
+      <div className="flex items-center justify-end h-full overflow-hidden">
+        {!user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center h-full"
           >
-            {btn.title}
+            <div className="mr-5 relative h-full flex items-center justify-center">
+              Join with us
+              <span className="absolute -right-2.5 w-0.5 h-5 top-1/2 -translate-y-1/2 bg-gray-600 rounded-full"></span>
+            </div>
+            {noSignUpData.map((btn, i) => (
+              <button
+                onClick={() => goModal(btn.modalAction)}
+                className={classNames(
+                  "text-base h-9 bg-myGray px-2.5 duration-150  w-24",
+                  {
+                    "bg-sky-600 hover:bg-sky-500 rounded-l-lg": i === 0,
+                  },
+                  {
+                    "bg-cyan-700 hover:bg-cyan-800 rounded-r-lg": i === 1,
+                  }
+                )}
+                key={i}
+              >
+                {btn.title}
+              </button>
+            ))}
+          </motion.div>
+        )}
+        {user && (
+          <button
+            onClick={logoutHandle}
+            type="button"
+            className="border-2 border-solid border-gray-500 hover:border-red-600 text-base font-medium px-5 h-10 duration-200 rounded-full"
+          >
+            Log out
           </button>
-        ))}
+        )}
       </div>
     </nav>
   );

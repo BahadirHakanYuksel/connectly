@@ -1,8 +1,13 @@
 import classNames from "classnames";
 import { useSelector } from "react-redux";
-import { closeModalHandle, openModalHandle } from "../../utils";
+import {
+  closeModalHandle,
+  loginHandle,
+  openModalHandle,
+  signHandle,
+} from "../../utils";
 import { AnimatePresence, delay, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Register() {
   const { modalOperation, modalData } = useSelector((state) => state.modal);
@@ -10,6 +15,24 @@ export default function Register() {
   const [passwordInputType, setPasswordInputType] = useState("password");
   const [passwordInputTypeSign, setPasswordInputTypeSign] =
     useState("password");
+
+  const [loginInputs, setLoginInputs] = useState({
+    login_email: "",
+    login_password: "",
+  });
+
+  const [signInputs, setSignInputs] = useState({
+    sign_email: "",
+    sign_password: "",
+    sign_password_again: "",
+  });
+
+  const [registerButtons, setRegisterButtons] = useState({
+    login_btn: false,
+    sign_btn: false,
+  });
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const changeTypeOfPasswordInput = () => {
     passwordInputType === "password"
@@ -22,6 +45,77 @@ export default function Register() {
       ? setPasswordInputTypeSign("text")
       : setPasswordInputTypeSign("password");
   };
+
+  const logInputsControl = () => {
+    emailRegex.test(loginInputs.login_email) &&
+    loginInputs.login_password.length >= 6
+      ? setRegisterButtons({ ...registerButtons, login_btn: true })
+      : setRegisterButtons({ ...registerButtons, login_btn: false });
+  };
+
+  const signInputsControl = () => {
+    emailRegex.test(signInputs.sign_email) &&
+    signInputs.sign_password.length >= 6 &&
+    signInputs.sign_password === signInputs.sign_password_again
+      ? setRegisterButtons({ ...registerButtons, sign_btn: true })
+      : setRegisterButtons({ ...registerButtons, sign_btn: false });
+  };
+
+  const updateInput = (inputInfo, selection) => {
+    const { name, value } = inputInfo;
+
+    switch (selection) {
+      case "login":
+        setLoginInputs({ ...loginInputs, [name]: value.trim() });
+
+        break;
+
+      case "sign":
+        setSignInputs({ ...signInputs, [name]: value.trim() });
+
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const loginAction = (e) => {
+    e.preventDefault();
+    loginHandle({
+      email: loginInputs.login_email,
+      password: loginInputs.login_password,
+    });
+    setLoginInputs({ login_email: "", login_password: "" });
+    closeModalHandle();
+  };
+
+  const signAction = (e) => {
+    e.preventDefault();
+    signHandle({
+      email: signInputs.sign_email,
+      password: signInputs.sign_password,
+    });
+
+    setSignInputs({
+      sign_email: "",
+      sign_password: "",
+      sign_password_again: "",
+    });
+    closeModalHandle();
+    openModalHandle({
+      operation: "login",
+    });
+  };
+  // login control
+  useEffect(() => {
+    logInputsControl();
+  }, [loginInputs]);
+
+  // sign up control
+  useEffect(() => {
+    signInputsControl();
+  }, [signInputs]);
 
   return (
     <motion.div
@@ -38,7 +132,7 @@ export default function Register() {
         }
       )}
     >
-      <form
+      <div
         className={classNames(
           "w-[200px] p-3 duration-500 h-full border-2 border-solid flex flex-col justify-center border-transparent overflow-hidden relative",
           {
@@ -88,8 +182,9 @@ export default function Register() {
                   </header>
                   <input
                     type="email"
-                    name=""
-                    id=""
+                    name="login_email"
+                    value={loginInputs.login_email}
+                    onChange={(e) => updateInput(e.target, "login")}
                     className="w-full h-11 rounded-md px-2.5 border-2 border-solid focus:bg-main focus:text-white focus:border-white duration-200 text-second font-medium"
                     placeholder="Enter Your E-Mail"
                   />
@@ -101,15 +196,16 @@ export default function Register() {
                   <div className="flex relative">
                     <input
                       type={passwordInputType}
-                      name=""
-                      id=""
+                      name="login_password"
+                      value={loginInputs.login_password}
+                      onChange={(e) => updateInput(e.target, "login")}
                       className="w-full h-11 rounded-md px-2.5 border-2 border-solid focus:bg-main focus:text-white focus:border-white duration-200 text-second font-medium"
                       placeholder="Enter Your Password"
                     />
                     <button
                       onClick={changeTypeOfPasswordInput}
                       type="button"
-                      className="flex items-center bg-gray-600 w-8 rounded-full hover:bg-gray-700 h-8 justify-center absolute right-2 top-1/2 -translate-y-1/2"
+                      className="flex items-center bg-gray-600 w-8 rounded-full hover:bg-gray-700 h-8 justify-center absolute right-2 top-1/2 -translate-y-1/2 active:bg-main"
                     >
                       <i
                         className={classNames(
@@ -135,8 +231,10 @@ export default function Register() {
                 </button>
               </div>
               <button
-                type="submit"
-                className="bg-sky-800 hover:bg-sky-700 duration-200 mt-5 h-14 text-xl font-medium rounded-full"
+                onClick={loginAction}
+                disabled={!registerButtons.login_btn}
+                type="button"
+                className="bg-sky-800 hover:bg-sky-700 duration-200 mt-5 h-14 text-xl font-medium rounded-full disabled:pointer-events-none disabled:opacity-75"
               >
                 Login
               </button>
@@ -158,8 +256,8 @@ export default function Register() {
             </motion.button>
           )}
         </AnimatePresence>
-      </form>
-      <form
+      </div>
+      <div
         className={classNames(
           "w-[200px] p-3 duration-500 relative  border-2 border-solid border-transparent",
           {
@@ -209,8 +307,9 @@ export default function Register() {
                   </header>
                   <input
                     type="email"
-                    name=""
-                    id=""
+                    name="sign_email"
+                    value={signInputs.sign_email}
+                    onChange={(e) => updateInput(e.target, "sign")}
                     className="w-full h-11 rounded-md border-2 border-solid focus:bg-main focus:text-white px-2.5 duration-200 text-second font-medium"
                     placeholder="Enter Your E-Mail"
                   />
@@ -222,24 +321,25 @@ export default function Register() {
                   <div className="flex relative">
                     <input
                       type={passwordInputTypeSign}
-                      name=""
-                      id=""
+                      name="sign_password"
+                      value={signInputs.sign_password}
+                      onChange={(e) => updateInput(e.target, "sign")}
                       className="w-full h-11 rounded-md border-2 border-solid focus:text-white px-2.5 focus:bg-main duration-200 text-second font-medium"
                       placeholder="Enter Your Password"
                     />
                     <button
                       onClick={changeTypeOfPasswordInputSign}
                       type="button"
-                      className="flex items-center bg-gray-600 w-8 rounded-full hover:bg-gray-700 h-8 justify-center absolute right-2 top-1/2 -translate-y-1/2"
+                      className="flex items-center bg-gray-600 w-8 rounded-full hover:bg-gray-700 h-8 justify-center absolute right-2 top-1/2 -translate-y-1/2 active:bg-main"
                     >
                       <i
                         className={classNames(
                           "fa-regular select-none pointer-events-none",
                           {
-                            "fa-eye": passwordInputType === "password",
+                            "fa-eye": passwordInputTypeSign === "password",
                           },
                           {
-                            "fa-eye-slash": passwordInputType === "text",
+                            "fa-eye-slash": passwordInputTypeSign === "text",
                           }
                         )}
                       ></i>
@@ -253,8 +353,9 @@ export default function Register() {
                   <div className="flex relative">
                     <input
                       type={passwordInputTypeSign}
-                      name=""
-                      id=""
+                      name="sign_password_again"
+                      value={signInputs.sign_password_again}
+                      onChange={(e) => updateInput(e.target, "sign")}
                       className="w-full h-11 rounded-md px-2.5 border-2 border-solid focus:bg-main focus:text-white focus:border-white duration-200 text-cyan-800 font-medium"
                       placeholder="Enter Your Password Again"
                     />
@@ -263,8 +364,10 @@ export default function Register() {
               </div>
 
               <button
-                type="submit"
-                className="bg-cyan-800 hover:bg-cyan-700 duration-200 mt-8 h-14 text-xl font-medium rounded-full"
+                onClick={signAction}
+                disabled={!registerButtons.sign_btn}
+                type="button"
+                className="bg-cyan-800 hover:bg-cyan-700 duration-200 mt-8 h-14 text-xl font-medium rounded-full disabled:pointer-events-none disabled:opacity-75"
               >
                 Sign up
               </button>
@@ -286,7 +389,7 @@ export default function Register() {
             </motion.button>
           )}
         </AnimatePresence>
-      </form>
+      </div>
     </motion.div>
   );
 }
